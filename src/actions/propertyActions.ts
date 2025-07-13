@@ -35,8 +35,8 @@ export async function getAllListedProperties(): Promise<TProperty[] | null> {
 
     const listings = await prisma.$queryRaw<TProperty[]>`
       SELECT p.*, l.availabilityStart, l.availabilityEnd 
-      FROM listing AS l
-      JOIN property AS p ON p.id = l.propertyId
+      FROM Listing AS l
+      JOIN Property AS p ON p.id = l.propertyId
       LIMIT 20
     `;
 
@@ -69,9 +69,9 @@ export async function getFilteredListings(
     // Build the query string and dynamically add parameters
     const query = `
     SELECT p.*, l.availabilityStart, l.availabilityEnd
-    FROM listing AS l
-    JOIN property AS p ON p.id = l.propertyId
-    JOIN location as loc ON loc.id= p.locationId
+    FROM Listing AS l
+    JOIN Property AS p ON p.id = l.propertyId
+    JOIN Location as loc ON loc.id= p.locationId
     WHERE 1=1
     ${destination ? "AND CONCAT_WS(' ', p.name, p.description, loc.city, loc.state, loc.country) LIKE ?" : ""}
     ${checkIn && checkOut ? "AND l.availabilityStart <= ? AND l.availabilityEnd >= ?" : ""}
@@ -89,7 +89,7 @@ export async function getFilteredListings(
   
     const propertiesSchemaArray = z.array(propertySchema);
     const validatedProperties = propertiesSchemaArray.parse(
-      filteredListings.map((listing) => listing)
+      filteredListings.map((listing: any) => listing)
     );
 
     if (!validatedProperties) {
@@ -117,7 +117,7 @@ export async function getAllPropertiesByUserId(
     // }
 
     const properties = await prisma.$queryRaw`
-      SELECT * from property where userId=${userId}
+      SELECT * from Property where userId=${userId}
 `
 
     console.log("ho",properties)
@@ -135,7 +135,7 @@ export async function getPropertyById(
 ): Promise<TProperty | null> {
   try {
     const properties = await prisma.$queryRaw<TProperty[]>`
-      SELECT * FROM property WHERE id = ${propertyId}
+      SELECT * FROM Property WHERE id = ${propertyId}
     `;
 
     
@@ -281,7 +281,7 @@ export async function updateProperty(
 
     // Check if the property exists
     const existingProperty = await prisma.$queryRaw<TProperty>`
-      SELECT * FROM property WHERE id=${propertyId}
+      SELECT * FROM Property WHERE id=${propertyId}
     `
     if (!existingProperty) {
       throw new Error(`Property with ID ${propertyId} not found`);
@@ -290,7 +290,7 @@ export async function updateProperty(
     // Check if the location already exists
 
     const locations = await prisma.$queryRaw<TLocation[]>`
-      SELECT * FROM location WHERE
+      SELECT * FROM Location WHERE
         city = ${validatedLocation.city} AND
         country= ${validatedLocation.country} AND 
         state = ${validatedLocation.state}
@@ -306,7 +306,7 @@ export async function updateProperty(
     const isHotel = validatedProperty.propertyType === "Hotel";
 
     await prisma.$queryRaw`
-      UPDATE property 
+      UPDATE Property 
       SET 
           name = ${validatedProperty.name},
           description = ${validatedProperty.description},
@@ -321,7 +321,7 @@ export async function updateProperty(
     `;
 
     await prisma.$queryRaw`
-    DELETE FROM image WHERE propertyId = ${propertyId};
+    DELETE FROM Image WHERE propertyId = ${propertyId};
     `
 
     for (const image of validatedImages) {
@@ -339,9 +339,9 @@ export async function updateProperty(
         l.country, 
         l.state, 
         GROUP_CONCAT(i.link) AS image_links
-      FROM property p
-        JOIN location l ON p.locationId = l.id 
-        LEFT JOIN image i ON i.propertyId = p.id
+      FROM Property p
+        JOIN Location l ON p.locationId = l.id 
+        LEFT JOIN Image i ON i.propertyId = p.id
       WHERE p.id = ${propertyId}
       GROUP BY p.id, l.city, l.country, l.state
     `;
@@ -399,7 +399,7 @@ export async function getAllImagesbyId(
 
     // Raw SQL query to fetch images based on propertyId
     const images = await prisma.$queryRaw<TImage[]>`
-      SELECT * FROM image WHERE propertyId = ${propertyId}
+      SELECT * FROM Image WHERE propertyId = ${propertyId}
     `;
 
     // Assuming the imageSchema validates the result structure
@@ -463,7 +463,7 @@ export async function updatePropertyDelete(
 
     // Update the property with raw SQL query
     const updatedProperty = await prisma.$executeRaw`
-      UPDATE property
+      UPDATE Property
       SET isDeleted = ${isDelete}
       WHERE id = ${propertyId}
     `;
@@ -471,7 +471,7 @@ export async function updatePropertyDelete(
     if (updatedProperty) {
       // Optionally, query the property after update to return the full record
       const property : TProperty = await prisma.$queryRaw`
-        SELECT * FROM property WHERE id=${propertyId}
+        SELECT * FROM Property WHERE id=${propertyId}
       `
 
       return property;
@@ -492,7 +492,7 @@ export async function isUserHasProperties(kindId: string) {
   console.log("UserId: ",userId)
 
   const res= await prisma.$queryRaw<TProperty[]>`
-    SELECT P.* FROM property p WHERE P.userId = ${userId?.id} 
+    SELECT P.* FROM Property as P WHERE P.userId = ${userId?.id} 
   `
   console.log("Result: ",res)
   if(res && res.length > 0){
@@ -530,12 +530,12 @@ export async function AllBookingPropertyDetails(userId: string){
           b.roomId,
           b.status,
           r.avg_rating AS review
-        FROM property AS p
-        JOIN booking AS b ON b.propertyId = p.id
-        JOIN user AS u ON u.id = b.userId
+        FROM Property AS p
+        JOIN Booking AS b ON b.propertyId = p.id
+        JOIN User AS u ON u.id = b.userId
         LEFT JOIN (
             SELECT propertyId, AVG(rating) AS avg_rating
-            FROM review
+            FROM Review
             GROUP BY propertyId
         ) AS r ON r.propertyId = p.id
         WHERE p.userId = ${userId}
@@ -554,7 +554,7 @@ export async function AllBookingPropertyDetails(userId: string){
 export async function getDeleteProplogs(userId: string) {
   const res: any[] = await prisma.$queryRaw`
     SELECT *
-    FROM deletion_log as dl
+    FROM Deletion_log as dl
     WHERE dl.userId = ${userId} COLLATE utf8mb4_unicode_ci
   `;
   console.log("Result:Deleted",res)

@@ -8,9 +8,8 @@ export async function getAllAmenitiesForProperty(
   try {
 
     const amenities = await prisma.$queryRaw`
-      SELECT * FROM amenity as a WHERE a.propertyId=${propertyId}
+      SELECT * FROM Amenity as a WHERE a.propertyId=${propertyId}
     `
-
     const amenitySchemaArray = z.array(amenitySchema);
     const validatedAmenities = amenitySchemaArray.parse(amenities);
     return validatedAmenities;

@@ -13,7 +13,7 @@ export async function getLocationById(
 
     // Raw SQL query to get location by locationId
     const location = await prisma.$queryRaw<TLocation[]>`
-      SELECT * FROM location WHERE id = ${locationId};`;
+      SELECT * FROM Location WHERE id = ${locationId};`;
 
     if (location.length === 0) {
       return null; // Return null if location not found

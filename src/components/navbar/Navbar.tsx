@@ -16,6 +16,7 @@ export default async function Navbar() {
   console.log("user in navbar: ",user);
 
   //fetch is the user has any properties (isOwner)
+  
   const res= await isUserHasProperties(user?.id)
   console.log("Is user has prop:",res)
 

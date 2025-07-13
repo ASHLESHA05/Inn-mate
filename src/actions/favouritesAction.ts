@@ -46,7 +46,7 @@ export async function deleteLiked(likedData: TFavourite) {
 
     // Check if the favorite exists using raw SQL
     const favorite = await prisma.$queryRaw<TFavourite[]>`
-      SELECT * FROM favourite
+      SELECT * FROM Favourite
       WHERE userId = ${validatedFavorites.userId}
         AND propertyId = ${validatedFavorites.propertyId};
     `;
@@ -58,7 +58,7 @@ export async function deleteLiked(likedData: TFavourite) {
 
     // Delete the favorite using raw SQL
     await prisma.$queryRaw`
-      DELETE FROM favourite
+      DELETE FROM Favourite
       WHERE userId = ${validatedFavorites.userId} AND propertyId = ${validatedFavorites.propertyId};
     `;
 
@@ -73,7 +73,7 @@ export async function deleteLiked(likedData: TFavourite) {
 
 export async function getIsfavourite(userId: string, propertyId: string) {
   const favourite = await prisma.$queryRaw<TFavourite[]>`
-    SELECT * FROM favourite
+    SELECT * FROM Favourite
     WHERE userId = ${userId} AND propertyId = ${propertyId}
     `;
 
@@ -98,7 +98,7 @@ export async function getAllfavourite(KindeId: string | ""): Promise<TFavourite[
 
   // Raw SQL query to get all favorites for a user
   const favourites = await prisma.$queryRaw<TFavourite[]>`
-    SELECT * FROM favourite
+    SELECT * FROM Favourite
     WHERE userId = ${user_id.id};`;
 
   if (!favourites) {

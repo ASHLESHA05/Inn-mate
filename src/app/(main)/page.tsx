@@ -6,7 +6,7 @@ import {
   getFilteredListings,
 } from "@/actions/propertyActions";
 import { getAllReviewsById } from "@/actions/reviewActions";
-import { getUserById} from "@/actions/userActions";
+import { getUserById } from "@/actions/userActions";
 import PropertyCard from "@/components/property/Property";
 import { TKindeUser } from "@/lib/definitions";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
@@ -18,63 +18,73 @@ import NoPropertyAvailable from "@/components/property/noProps";
 export default async function Home({
   searchParams,
 }: {
-  searchParams: { [key: string]: string | undefined };
+  searchParams: { [key: string]: string | string[] | undefined };
 }) {
-  const { getUser} = getKindeServerSession();
+  try{
+  const { getUser } = getKindeServerSession();
   const kindeUser = (await getUser()) as TKindeUser;
-  console.log(kindeUser);
+  console.log("User:", kindeUser);
+  }catch(error){
+    console.log("Finding User Error")
+  }
 
-  const destination = searchParams.dest;
-  const checkIn = searchParams.ci;
-  const checkOut = searchParams.co;
-  const type = searchParams.type === 'Any' ? undefined : searchParams.type;
+  // Utility: Handle string | string[] | undefined
+  const getParam = (key: string): string | undefined => {
+    const value = searchParams[key];
+    if (Array.isArray(value)) return value[0]?.trim() || undefined;
+    return value?.trim() || undefined;
+  };
 
-  console.log(destination, checkIn, checkOut);
+  // Utility: Convert to YYYY-MM-DD string or undefined
+  const toDateStringOrUndefined = (value?: string): string | undefined => {
+    if (!value) return undefined;
+    const date = new Date(value);
+    return isNaN(date.getTime()) ? undefined : date.toISOString().split('T')[0];
+  };
 
+  // Extract & sanitize search params
+  const destination = getParam("dest");
+  const checkIn = toDateStringOrUndefined(getParam("ci"));
+  const checkOut = toDateStringOrUndefined(getParam("co"));
+  const typeParam = getParam("type");
+  const type = typeParam && typeParam !== "Any" ? typeParam : undefined;
+
+  console.log("Parsed search params:", { destination, checkIn, checkOut, type });
+
+  // Fetch properties
   const properties =
     destination || checkIn || checkOut || type
       ? await getFilteredListings(destination, checkIn, checkOut, type)
       : await getAllListedProperties();
-  console.log("Properties: ",properties)
 
-  if (destination || checkIn || checkOut) {
-    console.log("Called getFilteredListings with:", {
-      destination,
-      checkIn,
-      checkOut,
-      properties,
-    });
-  } else {
-    // console.log("Called getAllListedProperties, properties:", properties);
-    console.log("Called getAllListedProperties")
-  }
-  console.log(properties)
-  // Check if properties is null or undefined before proceeding
-  if (!properties) {
-    return (
-      <NoPropertyAvailable/>
+  console.log("Fetched properties:", properties);
 
-
-    );
+  // Handle no results
+  if (!properties || properties.length === 0) {
+    return <NoPropertyAvailable />;
   }
 
+  // Build property cards
   const propertyCards = await Promise.all(
-    properties?.map(async (property) => {
+    properties.map(async (property) => {
       if (!property?.id || !property?.locationId) {
-        console.log("could'nt get props")
+        console.warn("Skipping invalid property:", property);
         return null;
       }
-      const reviews = await getAllReviewsById(property.id);
-      const amenities = await getAllAmenitiesForProperty(property.id);
-      const images = await getAllImagesbyId(property.id);
-      const location = await getLocationById(property.locationId);
-      const user = await getUserById(property.userId);
-      console.log("Amenities",amenities)
+
+      const [reviews, amenities, images, location, user] = await Promise.all([
+        getAllReviewsById(property.id),
+        getAllAmenitiesForProperty(property.id),
+        getAllImagesbyId(property.id),
+        getLocationById(property.locationId),
+        getUserById(property.userId),
+      ]);
+
       if (!amenities || !location || !user) {
-        console.error("couldn't get all the props for property: ", property);
+        console.error("Couldn't fetch all details for property:", property);
         return null;
       }
-      console.log(property)
+
       return (
         <PropertyCard
           key={property.id}
@@ -97,7 +107,7 @@ export default async function Home({
     <>
       <PropTypesSelect />
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
-        {propertyCards.length > 0 ? (
+        {propertyCards.filter(Boolean).length > 0 ? (
           propertyCards.filter(Boolean)
         ) : (
           <div className="text-red-600 text-center font-semibold text-lg w-full mt-8">
@@ -105,8 +115,6 @@ export default async function Home({
           </div>
         )}
       </div>
-      {/* <h1 className="text-2xl font-bold mt-12">Previous Bookings</h1>
-      <p className="text-gray-600 mt-4 mb-8">Here we will show your previous bookings if available.</p> */}
       <AboutUs />
       <Footer />
     </>

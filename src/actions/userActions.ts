@@ -20,7 +20,7 @@ export async function getUserById(id_: string | undefined): Promise<TUser | null
   const result:TUser[] = await prisma.$queryRaw`
     SELECT u.*,city,state,country 
     FROM User as u
-    JOIN address as p
+    JOIN Address as p
     on u.addressId = p.id
     WHERE u.id = ${id_}
   `;
@@ -37,7 +37,7 @@ export async function getUserByKindeId(kindeId: string): Promise<TUser | null> {
   const result:TUser[] = await prisma.$queryRaw`
     SELECT u.*,city,state,country 
     FROM User as u
-    JOIN address as p
+    JOIN Address as p
     on u.addressId = p.id
     WHERE kindeId = ${kindeId}
   `;
@@ -58,7 +58,7 @@ export async function isAuthenticatedUserInDb(id: string): Promise<TUser | null>
   const result:TUser[] = await prisma.$queryRaw`
     SELECT u.*, city, state,country 
     FROM User as u 
-    JOIN address as ad
+    JOIN Address as ad
     ON  u.addressId = ad.id
     WHERE u.id = ${id}
   `;
@@ -120,8 +120,8 @@ export async function createUser(user: TUser): Promise<TUser | null> {
     VALUES (${userId}, ${name}, ${email}, ${dob}, ${gender},${new Date()}, ${kindeId}, ${addressId})
   `;
   const userResult: TUser[]= await prisma.$queryRaw`
-    SELECT u.*, city, state, country FROM user as u 
-    JOIN address as ad ON u.addressId = ad.id
+    SELECT u.*, city, state, country FROM User as u 
+    JOIN Address as ad ON u.addressId = ad.id
   `
 
   // If the user insertion failed, return null
@@ -156,7 +156,7 @@ export async function updateUser(user: TUser): Promise<TUser | null> {
 
   
 const addressResult: { addressId: string }[] = await prisma.$queryRaw`
-  SELECT addressId FROM user WHERE id = ${id}
+  SELECT addressId FROM User WHERE id = ${id}
 `;
 
 // Extract the address ID if it exists
@@ -165,13 +165,13 @@ const AddId = addressResult[0]?.addressId || cuid();
 if (!addressResult[0]?.addressId) {
   // Create new address if none exists
   await prisma.$queryRaw`
-    INSERT INTO address (id, city, state, country)
+    INSERT INTO Address (id, city, state, country)
     VALUES (${AddId}, ${address.city}, ${address.state}, ${address.country})
   `;
 } else {
   // Update existing address if addressId exists
   await prisma.$queryRaw`
-    UPDATE address
+    UPDATE Address
     SET city = ${address.city}, state = ${address.state}, country = ${address.country}
     WHERE id = ${AddId}
   `;
@@ -187,8 +187,8 @@ if (!addressResult[0]?.addressId) {
     WHERE id = ${id} `
 
   const userResult:TUser[] = await prisma.$queryRaw`
-    SELECT u.*,city,state, country FROM user as u
-    JOIN address as ad on u.addressId=ad.id
+    SELECT u.*,city,state, country FROM User as u
+    JOIN Address as ad on u.addressId=ad.id
     WHERE u.id=${id}
 
   `;
@@ -199,7 +199,7 @@ if (!addressResult[0]?.addressId) {
   const userUpdate: TUser[]= await prisma.$queryRaw`
       SELECT u.*, city, state, country
       FROM User AS u
-      JOIN address AS ad ON u.addressId = ad.id
+      JOIN Address AS ad ON u.addressId = ad.id
       WHERE u.id = ${id}
   `
   const updatedUser = userUpdate[0];
@@ -245,8 +245,8 @@ export async function mapKindeUserToUser(user: TKindeUser): Promise<TUser | null
   
 //! MAP KINDE USER TO USER
       const alreadyUser: TUser[] = await prisma.$queryRaw`
-        SELECT u.*, city , state, country FROM user as u
-        JOIN address as ad ON u.addressId=ad.id
+        SELECT u.*, city , state, country FROM User as u
+        JOIN Address as ad ON u.addressId=ad.id
         WHERE u.kindeId=${user.id}
       `
 

@@ -20,7 +20,7 @@ export async function createListing(
 
     //check if listing exists
     const result = await prisma.$queryRaw<TListing[]>`
-      SELECT * FROM listing WHERE userId = ${listingValues.userId} AND propertyId = ${listingValues.propertyId}
+      SELECT * FROM Listing WHERE userId = ${listingValues.userId} AND propertyId = ${listingValues.propertyId}
     `
 
     if (result.length > 0){

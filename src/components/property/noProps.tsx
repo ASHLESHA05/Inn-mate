@@ -18,7 +18,6 @@ const NoPropertyAvailable: React.FC = () => {
         className="flex items-center gap-2 text-white bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded-md shadow-md"
       >
         <span className="material-icons">refresh</span>
-        Refresh
       </Button>
     </div>
   );

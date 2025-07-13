@@ -3,8 +3,6 @@ import prisma from "@/lib/db";
 import { bookingSchema, TBooking, TProperty } from "@/lib/definitions";
 import { getUserByKindeId} from "./userActions";
 import cuid from "cuid";
-import { log } from "console";
-
 
 //=================================================================================================================================
 export default async function getBookingDetailsByPropertyId(
@@ -15,7 +13,7 @@ export default async function getBookingDetailsByPropertyId(
 
 // ! This code is for getting Booked property details {SQL FUNCTION}
 const bookings: any = await prisma.$queryRaw`
-  SELECT * FROM get_active_bookings(${propertyId});
+  SELECT * FROM Get_active_bookings(${propertyId});
 `;
 // !
 
@@ -50,18 +48,6 @@ export async function createBooking(
     console.log("InBooking",validatedBooking)
     const checkiniutid=cuid()
 //! procedure CALL for Inserting Booking and Payment {PROCEDURE}
-/*
-  await prisma.$executeRawUnsafe(
-    `CALL InsertBookingAndPayment(?, ?, ?, ?, ?);`,
-    bookingid,
-    validatedBooking.totalPrice,
-    validatedBooking.userId,
-    validatedBooking.propertyId,
-    validatedBooking.status,
-    validatedBooking.Adult,
-    validatedBooking.Child
-  );
-  */
   await prisma.$queryRaw`
     CALL InsertBookingAndPayment(
       ${bookingid}, 
@@ -75,8 +61,6 @@ export async function createBooking(
       ${booking.Numberofrooms}
     );
   `
-  
-
 //! A TRIGGER IS EXECUTED IN MYSQL TO DECREASE THE NUMBER OF ROOMS IF PROPERTY TYPE IS HOTEL
 
 
@@ -102,8 +86,6 @@ prisma.$queryRaw
   Safe Query Execution: This is the preferred method to run raw SQL queries in Prisma because it automatically sanitizes inputs and prevents SQL injection attacks.
   Parameterized Queries: You can safely interpolate variables into the query by passing them as parameters. Prisma handles escaping and preparing the query.
   Type Safety: When you use $queryRaw, Prisma provides better type safety. For example, you can define the expected return type and Prisma will ensure that the result matches i
-
-
 
 prisma.$queryRawUnsafe
   No Safety Checks: prisma.$queryRawUnsafe bypasses Prisma's built-in SQL sanitization and escapes checks. This means you are responsible for manually ensuring that the input values are safe to prevent SQL injection.
@@ -133,8 +115,6 @@ prisma.$queryRawUnsafe
   }
 }
 
-
-
 //=================================================================================================================================
 export async function getAllBookingsForProperty(
   propertyId?: string
@@ -148,8 +128,8 @@ export async function getAllBookingsForProperty(
     //! Get All bookings for properties
     const bookingsRaw :any= await prisma.$queryRaw`
     SELECT b.* , c.checkInDate , c.checkOutDate 
-    FROM booking as b 
-    JOIN checkincheckout as c ON b.id = c.bookingId
+    FROM Booking as b 
+    JOIN Checkincheckout as c ON b.id = c.bookingId
     WHERE b.propertyId = ${propertyId}
   `;
   
@@ -188,20 +168,18 @@ export async function DeleteBookingsbyIds(bookingIds: string[] | undefined) {
     const bookingIdsString = bookingIds.map(id => `'${id}'`).join(',');
 
     const result = await prisma.$queryRaw`
-      DELETE FROM booking
+      DELETE FROM Booking
       WHERE id IN (
         SELECT id 
-        FROM booking 
+        FROM Booking 
         WHERE id IN (${bookingIdsString})
         AND propertyId IN (
           SELECT id 
-          FROM property 
+          FROM Property 
           WHERE isDeleted = false
         )
       );
     `;
-    
-
 
     return result || null;
   } catch (error) {
@@ -232,12 +210,12 @@ export async function getAllBookedProperties(
       p.locationId, 
       c.checkInDate, c.checkOutDate,
       b.totalPrice, b.userId
-    FROM booking AS b
-    JOIN property AS p ON b.propertyId = p.id
-    JOIN checkIncheckOut AS c ON b.id = c.bookingId
+    FROM Booking AS b
+    JOIN Property AS p ON b.propertyId = p.id
+    JOIN CheckIncheckOut AS c ON b.id = c.bookingId
     WHERE b.status IN ('ACTIVE', 'CONFIRMED') 
       AND b.userId = ${user.id} 
-      AND p.id IN (SELECT propertyId FROM booking WHERE status IN ('ACTIVE', 'CONFIRMED'))
+      AND p.id IN (SELECT propertyId FROM Booking WHERE status IN ('ACTIVE', 'CONFIRMED'))
   `;
   
       const formattedBookings : (TBooking & {property: TProperty} )[] = bookings.map((rawBooking: any) => ({ 
@@ -282,9 +260,9 @@ export async function is_available(from: Date, to: Date, propertyId: string) {
 
   const res:any = await prisma.$queryRaw`
       SELECT p.maxGuests
-    FROM property AS p
-    LEFT JOIN booking AS b ON b.propertyId = p.id
-    LEFT JOIN checkincheckout AS c ON c.bookingId = b.id
+    FROM Property AS p
+    LEFT JOIN Booking AS b ON b.propertyId = p.id
+    LEFT JOIN Checkincheckout AS c ON c.bookingId = b.id
     WHERE p.id = ${propertyId}
     AND NOT (
       ${from} >= c.checkoutDate OR 

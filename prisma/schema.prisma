@@ -72,6 +72,7 @@ model Property {
   reviews    Review[]
   favourites Favourite[]
   amenities  Amenity[]
+  Current_Space Int?  
 }
 
 model Room {
@@ -82,7 +83,7 @@ model Room {
   pricePerNight Float
 
   propertyId String
-  property   Property @relation(fields: [propertyId], references: [id],onDelete: Cascade)
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
 
   bookings Booking[]
 }
@@ -115,7 +116,7 @@ model Booking {
   user   User   @relation(fields: [userId], references: [id])
 
   propertyId String
-  property   Property @relation(fields: [propertyId], references: [id],onDelete: Cascade)
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
 
   roomId String?
   room   Room?   @relation(fields: [roomId], references: [id])
@@ -142,7 +143,7 @@ model Review {
   user   User   @relation(fields: [userId], references: [id])
 
   propertyId String
-  property   Property @relation(fields: [propertyId], references: [id],onDelete: Cascade)
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
 }
 
 model Favourite {
@@ -151,7 +152,7 @@ model Favourite {
   propertyId String
 
   user     User     @relation(fields: [userId], references: [id])
-  property Property @relation(fields: [propertyId], references: [id],onDelete: Cascade)
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
 
   @@unique([userId, propertyId])
 }
@@ -167,7 +168,7 @@ model Listing {
   user   User   @relation(fields: [userId], references: [id])
 
   propertyId String
-  property   Property @relation(fields: [propertyId], references: [id],onDelete: Cascade)
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
 
   @@unique([userId, propertyId])
 }
@@ -177,7 +178,7 @@ model Amenity {
   name AmenityType
 
   propertyId String
-  property   Property @relation(fields: [propertyId], references: [id],onDelete: Cascade)
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
 }
 
 enum AmenityType {
@@ -222,12 +223,3 @@ model CheckInCheckOut {
   bookingId String  @unique
   booking   Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
 }
-
-// model Admin {
-//   id        String   @id @default(cuid())
-//   name      String
-//   email     String   @unique
-//   password  String
-//   createdAt DateTime @default(now())
-//   updatedAt DateTime @updatedAt
-// }

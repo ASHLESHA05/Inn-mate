@@ -14,7 +14,7 @@ export async function getAllReviewsById(
   try {
     // Step 1: Fetch reviews with userId
     const reviews = await prisma.$queryRaw`
-      SELECT * FROM review WHERE propertyId = ${propertyId}
+      SELECT * FROM Review WHERE propertyId = ${propertyId}
     `;
 
     // Step 2: Validate reviews using zod schema
@@ -47,7 +47,7 @@ export async function AddReviews(
 ){
   try{
     await prisma.$queryRaw`
-      INSERT INTO review(id,rating,comment,userId,propertyId,createdAt)
+      INSERT INTO Review(id,rating,comment,userId,propertyId,createdAt)
       values(${cuid()}, ${data.rating}, ${data.comment} ,${data.userId}, ${data.propertyId},${data.createdAt})
     `
     revalidatePath(`/properties/${data.propertyId}`)
