@@ -18,21 +18,22 @@ type BookingDetails = {
 };
 
 type Props = {
-  params: {
+  params: Promise<{
     userId: string;
-  };
+  }>;
 };
 
-export default async function AllBookings({ params }: Props) {
+export default async function AllBookings(props: Props) {
+  const params = await props.params;
   const { userId } = params;
-//   const router = useRouter();
+  //   const router = useRouter();
 
   const user = await getUserByKindeId(userId);
   if (!user) {
     return <h1>User Not found</h1>;
   }
 
-  const all_booking_property_details: BookingDetails[] = await AllBookingPropertyDetails(user.id ?? "") || [];
+  const all_booking_property_details: BookingDetails[] = (await AllBookingPropertyDetails(user.id ?? "")) || [];
 
   // Redirect to '/' if there are no bookings
   if (all_booking_property_details.length === 0) {

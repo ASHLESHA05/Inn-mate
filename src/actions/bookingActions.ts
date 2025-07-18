@@ -129,7 +129,7 @@ export async function getAllBookingsForProperty(
     const bookingsRaw :any= await prisma.$queryRaw`
     SELECT b.* , c.checkInDate , c.checkOutDate 
     FROM Booking as b 
-    JOIN Checkincheckout as c ON b.id = c.bookingId
+    JOIN CheckInCheckOut as c ON b.id = c.bookingId
     WHERE b.propertyId = ${propertyId}
   `;
   
@@ -262,7 +262,7 @@ export async function is_available(from: Date, to: Date, propertyId: string) {
       SELECT p.maxGuests
     FROM Property AS p
     LEFT JOIN Booking AS b ON b.propertyId = p.id
-    LEFT JOIN Checkincheckout AS c ON c.bookingId = b.id
+    LEFT JOIN CheckInCheckOut AS c ON c.bookingId = b.id
     WHERE p.id = ${propertyId}
     AND NOT (
       ${from} >= c.checkoutDate OR 

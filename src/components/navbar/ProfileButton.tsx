@@ -65,9 +65,9 @@ const ProfileButton = ({isOwner} : ProfileButtonProps) => {
             {user.given_name + " " + (user.family_name ? user.family_name : "")}
           </div>
           {links.map((link) => (
-            <Link href={link.link}>
+            <Link  key={link.label} href={link.link}>
               <Button
-                key={link.label}
+               
                 variant="ghost"
                 className="w-full justify-start"
               >

@@ -4,10 +4,11 @@ import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/com
 import { Table, TableHeader, TableRow, TableCell, TableBody } from "@/components/ui/table";
 
 type Props = {
-  params: { userId: string };
+  params: Promise<{ userId: string }>;
 };
 
-export default async function AllBookingsdelLogs({ params }: Props) {
+export default async function AllBookingsdelLogs(props: Props) {
+  const params = await props.params;
   const { userId } = params;
   const user = await getUserByKindeId(userId);
 

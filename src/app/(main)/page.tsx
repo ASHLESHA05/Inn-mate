@@ -13,20 +13,22 @@ import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import PropTypesSelect from "@/components/propertyTypes/propTypes";
 import Footer from "@/components/footer/footer";
 import AboutUs from "@/components/contents/Aboutus";
-import NoPropertyAvailable from "@/components/property/noProps";
 
 export default async function Home({
-  searchParams = {},
+  searchParams,
 }: {
-  searchParams?: { [key: string]: string | string[] | undefined };
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  // Handle undefined safely
+  const resolvedParams = await searchParams;
+
+  // Helper to extract query parameters
   const getParam = (key: string): string | undefined => {
-    const value = searchParams?.[key];
+    const value = resolvedParams?.[key];
     if (Array.isArray(value)) return value[0]?.trim() || undefined;
     return value?.trim() || undefined;
   };
 
+  // Format date to YYYY-MM-DD or return undefined
   const toDateStringOrUndefined = (value?: string): string | undefined => {
     if (!value) return undefined;
     const date = new Date(value);
@@ -39,84 +41,81 @@ export default async function Home({
   const typeParam = getParam("type");
   const type = typeParam && typeParam !== "Any" ? typeParam : undefined;
 
-  console.log("Parsed search params:", {
-    destination,
-    checkIn,
-    checkOut,
-    type,
-  });
-
+  // Fetch authenticated user (optional)
   let kindeUser: TKindeUser | null = null;
   try {
     const { getUser } = getKindeServerSession();
     kindeUser = (await getUser()) as TKindeUser;
     console.log("User:", kindeUser);
   } catch (error) {
-    console.log("Finding User Error", error);
+    console.warn("Failed to fetch user:", error);
   }
 
-  // Fetch listings
-  const properties =
-    destination || checkIn || checkOut || type
-      ? await getFilteredListings(destination, checkIn, checkOut, type)
-      : await getAllListedProperties();
+  // Get property listings based on filters (if any)
+  const properties = destination || checkIn || checkOut || type
+    ? await getFilteredListings(destination, checkIn, checkOut, type)
+    : await getAllListedProperties();
 
-  console.log("Fetched properties:", properties);
-
-  if (!properties || properties.length === 0) {
-    return <NoPropertyAvailable />;
-  }
-
+  // Prepare property cards
   const propertyCards = await Promise.all(
     properties.map(async (property) => {
       if (!property?.id || !property?.locationId) {
-        console.warn("Skipping invalid property:", property);
+        console.warn("Skipping property with missing ID or location:", property);
         return null;
       }
 
-      const [reviews, amenities, images, location, user] = await Promise.all([
-        getAllReviewsById(property.id),
-        getAllAmenitiesForProperty(property.id),
-        getAllImagesbyId(property.id),
-        getLocationById(property.locationId),
-        getUserById(property.userId),
-      ]);
+      try {
+        const [reviews, amenities, images, location, user] = await Promise.all([
+          getAllReviewsById(property.id),
+          getAllAmenitiesForProperty(property.id),
+          getAllImagesbyId(property.id),
+          getLocationById(property.locationId),
+          getUserById(property.userId),
+        ]);
 
-      if (!amenities || !location || !user) {
-        console.error("Couldn't fetch all details for property:", property);
+        if (!location || !amenities || !user) {
+          console.error("Incomplete data for property:", property.id);
+          return null;
+        }
+
+        return (
+          <PropertyCard
+            key={property.id}
+            property={property}
+            location={location}
+            reviews={reviews}
+            amenities={amenities}
+            images={images}
+            type="book"
+            hostName={user.name}
+            hostKindeId={property.userId}
+            favorites=""
+            status={null}
+          />
+        );
+      } catch (error) {
+        console.error("Failed to fetch property details:", property.id, error);
         return null;
       }
-
-      return (
-        <PropertyCard
-          key={property.id}
-          property={property}
-          location={location}
-          reviews={reviews}
-          amenities={amenities}
-          images={images}
-          type="book"
-          hostName={user.name}
-          hostKindeId={property.userId}
-          favorites=""
-          status={null}
-        />
-      );
     })
   );
+
+  const validCards = propertyCards.filter(Boolean);
 
   return (
     <>
       <PropTypesSelect />
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
-        {propertyCards.filter(Boolean).length > 0 ? (
-          propertyCards.filter(Boolean)
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-6 min-h-[50vh]">
+        {validCards.length > 0 ? (
+          validCards
         ) : (
-          <div className="text-red-600 text-center font-semibold text-lg w-full mt-8">
+          <div className="text-red-600 text-center font-semibold text-lg w-full mt-8 col-span-full">
             No property available
           </div>
         )}
       </div>
+
       <AboutUs />
       <Footer />
     </>

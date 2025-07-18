@@ -6,11 +6,12 @@ import { getUserById} from "@/actions/userActions";
 import ListProperty from "@/components/property/ListProperty";
 import React from "react";
 
-const page = async ({
-  params,
-}: {
-  params: { propertyId: string; userId: string };
-}) => {
+const page = async (
+  props: {
+    params: Promise<{ propertyId: string; userId: string }>;
+  }
+) => {
+  const params = await props.params;
   const property = await getPropertyById(params.propertyId);
   if (!property || !property.id || !property.locationId) {
     return (<div>Invalid property Id</div>);

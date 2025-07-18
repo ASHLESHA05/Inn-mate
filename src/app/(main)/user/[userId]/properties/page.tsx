@@ -28,6 +28,7 @@ const MyProperties = async () => {
   }
 
   const properties = await getAllPropertiesByUserId(user.id);
+  console.log("Properties",properties)
   if (!properties) {
     return (<div>sorry couldn't fetch the properties</div>);
   }

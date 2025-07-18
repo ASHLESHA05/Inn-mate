@@ -4,6 +4,7 @@ import { isAuthenticatedUserInDb } from "./userActions";
 import prisma from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import  cuid  from "cuid";  // Import cuid for generating unique IDs
+import { Listing } from "@prisma/client";
 
 export async function createListing(
   listingValues: TListing
@@ -56,26 +57,20 @@ export async function getListing(
 ): Promise<TListing | null> {
   try {
     if (!propertyId || !userId) {
-      throw new Error("couldn't get the user or property");
+      throw new Error("Couldn't get the user or property");
     }
+
     console.log("property, userId:", propertyId, userId);
-      const listing = await prisma.listing.findUnique({
-        where: {
-          userId_propertyId: {
-            userId,
-            propertyId},
-            availabilityEnd: {
-              gte: new Date(),
-        },
-      }
-    }
-      );
+
+    const listing = await prisma.$queryRaw<TListing[]>`
+      SELECT * FROM Listing WHERE userId = ${userId} AND propertyId = ${propertyId}
+    `;
+
     console.log("Listing in getListing: ", listing);
 
-    const validatedListing = listingSchema.parse(listing);
+    if (listing.length === 0) return null;
 
-    revalidatePath("/");
-    return validatedListing;
+    return listing[0];  // ✅ Return first item only
   } catch (error) {
     console.error("Error in finding the listing: ", error);
     return null;

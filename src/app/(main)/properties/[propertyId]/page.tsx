@@ -11,7 +11,8 @@ import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 // import { useRouter } from "next/navigation";
 import React from "react";
 
-const page = async ({ params }: { params: { propertyId: string } }) => {
+const page = async (props: { params: Promise<{ propertyId: string }> }) => {
+  const params = await props.params;
   // const router=useRouter()
   // const {toast}=useToast()
   const property = await getPropertyById(params.propertyId);

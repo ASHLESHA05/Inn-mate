@@ -16,7 +16,8 @@ import {
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-const Bookings = async ({ params }: { params: { kindeId: string } }) => {
+const Bookings = async (props: { params: Promise<{ kindeId: string }> }) => {
+  const params = await props.params;
   const kindeId = params.kindeId;
   const bookings = (await getAllBookedProperties(kindeId)) as (TBooking & {
     property: TProperty;

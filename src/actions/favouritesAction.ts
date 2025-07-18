@@ -38,8 +38,6 @@ export default async function addLiked(
 }
 
 
-
-
 export async function deleteLiked(likedData: TFavourite) {
   try {
     const validatedFavorites = favouriteSchema.parse(likedData);

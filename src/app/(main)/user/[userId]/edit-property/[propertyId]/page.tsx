@@ -5,13 +5,14 @@ import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import React from "react";
 
 type Props = {
-  params: {
+  params: Promise<{
     kindeUserId: string;
     propertyId: string;
-  };
+  }>;
 };
 
-export default async function AddPropertyPage({ params }: Props) {
+export default async function AddPropertyPage(props: Props) {
+  const params = await props.params;
   const { kindeUserId, propertyId } = params; // Access both parameters here
   console.log(kindeUserId+'sdkncdsbbvh445@#$54f')
   const { getUser } = getKindeServerSession();

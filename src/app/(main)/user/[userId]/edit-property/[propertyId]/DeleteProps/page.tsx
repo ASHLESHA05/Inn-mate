@@ -6,12 +6,13 @@ import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server';
 import React from 'react'
 
 type Props = {
-    params: {
+    params: Promise<{
       kindeUserId: string;
       propertyId: string;
-    };
+    }>;
   };
-export default async  function Deleteprops({ params }: Props){
+export default async function Deleteprops(props: Props) {
+    const params = await props.params;
     const {kindeUserId,propertyId}=params
     const { getUser } = getKindeServerSession();
     const kindeUser = (await getUser()) as TKindeUser;
@@ -22,7 +23,7 @@ export default async  function Deleteprops({ params }: Props){
     if(!user){
         return(<h1>Sorry..Something went wrong</h1>)
     }
-    
+
     const bookings=await getBookingDetailsByPropertyId(propertyId)
     return(
         <>

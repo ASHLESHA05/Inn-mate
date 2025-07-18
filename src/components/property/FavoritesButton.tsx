@@ -9,10 +9,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
-import { getUserByKindeId } from '@/actions/userActions';
+import { getUserByKindeId } from "@/actions/userActions";
 
 interface FavoriteButtonProps {
-  propertyId: string | '';
+  propertyId: string;
 }
 
 export default function FavoriteButton({ propertyId }: FavoriteButtonProps) {
@@ -27,70 +27,53 @@ export default function FavoriteButton({ propertyId }: FavoriteButtonProps) {
     defaultValues: { userId: "", propertyId: "" },
   });
 
+  // Fetch user and set in form
   useEffect(() => {
     const fetchUser = async () => {
-      if (kindeId) {
-        const userId = await getUserByKindeId(kindeId);
-        if (!userId) {
-          console.error('User not found in the database.');
-          return;
-        }
-        favorites.setValue("userId", userId?.id || '');
+      if (!kindeId) return;
+
+      const userRecord = await getUserByKindeId(kindeId);
+      if (!userRecord) {
+        console.error('User not found in DB');
+        return;
+      }
+
+      favorites.setValue("userId", userRecord.id);
+
+      // Now check if this property is already favorited
+      if (propertyId) {
+        const isFav = await getIsfavourite(userRecord.id, propertyId);
+        setIsFavorited(!!isFav);
       }
     };
-    fetchUser();
-  }, [kindeId, favorites]);
 
-  //make by default red for all liked fav things..
-  const setFav=async()=>{
-  if(favorites.getValues().userId){
-    //user exists now check if the field is favorited or not then set isFavorite
-    if(propertyId){
-      const isRed=await getIsfavourite(favorites.getValues().userId,propertyId)
-      if(isRed){
-        //the property is in Favorites
-        setIsFavorited(true)
-      }
-      else{
-        setIsFavorited(false)
-      }
-    }
-  }
-}
-  setFav();
+    fetchUser();
+  }, [kindeId, propertyId, favorites]);
 
   const handleToggleFavorite = async () => {
-    if (!isAuthenticated) {
-      toast({ title: "Error", description: "User not authenticated" });
-      return;
-    }
-
-    if (!user?.id) {
+    if (!isAuthenticated || !user?.id) {
       toast({ title: "Error", description: "Please log in first" });
-      router.push(`/`);
+      router.push("/");
       return;
     }
 
     try {
-      let result;
+      const formValues = favorites.getValues();
+      const payload: TFavourite = { ...formValues, propertyId };
 
       if (isFavorited) {
-        result = await deleteLiked({ ...favorites.getValues(), propertyId });
-        if (!result) {
-          throw new Error("Couldn't remove favorites");
-        }
-        setIsFavorited(false);  // Update state after successful delete
+        const result = await deleteLiked(payload);
+        if (!result) throw new Error("Couldn't remove from favorites");
+        setIsFavorited(false);
       } else {
-        result = await addliked(favorites.getValues().userId, { ...favorites.getValues(), propertyId });
-        if (!result) {
-          console.log("Favorite result",result)
-          throw new Error("Couldn't add to favorites");
-        }
-        setIsFavorited(true);  // Update state after successful add
-        router.refresh(); 
+        const result = await addliked(formValues.userId, payload);
+        if (!result) throw new Error("Couldn't add to favorites");
+        setIsFavorited(true);
       }
+
+      router.refresh(); // Optional: refresh data if needed
     } catch (error) {
-      console.error("Something went wrong", error);
+      console.error("Favorite toggle failed", error);
       toast({ title: "Error", description: "Error updating favorites" });
     }
   };
