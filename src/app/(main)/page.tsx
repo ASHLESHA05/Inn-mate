@@ -16,42 +16,46 @@ import AboutUs from "@/components/contents/Aboutus";
 import NoPropertyAvailable from "@/components/property/noProps";
 
 export default async function Home({
-  searchParams,
+  searchParams = {},
 }: {
-  searchParams: { [key: string]: string | string[] | undefined };
+  searchParams?: { [key: string]: string | string[] | undefined };
 }) {
-  try{
-  const { getUser } = getKindeServerSession();
-  const kindeUser = (await getUser()) as TKindeUser;
-  console.log("User:", kindeUser);
-  }catch(error){
-    console.log("Finding User Error")
-  }
-
-  // Utility: Handle string | string[] | undefined
+  // Handle undefined safely
   const getParam = (key: string): string | undefined => {
-    const value = searchParams[key];
+    const value = searchParams?.[key];
     if (Array.isArray(value)) return value[0]?.trim() || undefined;
     return value?.trim() || undefined;
   };
 
-  // Utility: Convert to YYYY-MM-DD string or undefined
   const toDateStringOrUndefined = (value?: string): string | undefined => {
     if (!value) return undefined;
     const date = new Date(value);
-    return isNaN(date.getTime()) ? undefined : date.toISOString().split('T')[0];
+    return isNaN(date.getTime()) ? undefined : date.toISOString().split("T")[0];
   };
 
-  // Extract & sanitize search params
   const destination = getParam("dest");
   const checkIn = toDateStringOrUndefined(getParam("ci"));
   const checkOut = toDateStringOrUndefined(getParam("co"));
   const typeParam = getParam("type");
   const type = typeParam && typeParam !== "Any" ? typeParam : undefined;
 
-  console.log("Parsed search params:", { destination, checkIn, checkOut, type });
+  console.log("Parsed search params:", {
+    destination,
+    checkIn,
+    checkOut,
+    type,
+  });
 
-  // Fetch properties
+  let kindeUser: TKindeUser | null = null;
+  try {
+    const { getUser } = getKindeServerSession();
+    kindeUser = (await getUser()) as TKindeUser;
+    console.log("User:", kindeUser);
+  } catch (error) {
+    console.log("Finding User Error", error);
+  }
+
+  // Fetch listings
   const properties =
     destination || checkIn || checkOut || type
       ? await getFilteredListings(destination, checkIn, checkOut, type)
@@ -59,12 +63,10 @@ export default async function Home({
 
   console.log("Fetched properties:", properties);
 
-  // Handle no results
   if (!properties || properties.length === 0) {
     return <NoPropertyAvailable />;
   }
 
-  // Build property cards
   const propertyCards = await Promise.all(
     properties.map(async (property) => {
       if (!property?.id || !property?.locationId) {
