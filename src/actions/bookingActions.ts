@@ -12,7 +12,7 @@ export default async function getBookingDetailsByPropertyId(
 
 
 // ! This code is for getting Booked property details {SQL FUNCTION}
-const bookings: any = await prisma.$queryRaw`
+const bookings:any = await prisma.$queryRaw`
   SELECT * FROM Get_active_bookings(${propertyId});
 `;
 // !
@@ -40,7 +40,7 @@ const bookings: any = await prisma.$queryRaw`
 }
 //=================================================================================================================================
 export async function createBooking(
-  booking: TBooking & {isShared:boolean,Numberofrooms: Number | null}
+  booking: TBooking & {isShared:boolean,Numberofrooms: number | null}
 ): Promise<TBooking | null> {
   try {
     const validatedBooking = bookingSchema.parse(booking);

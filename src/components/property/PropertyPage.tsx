@@ -39,19 +39,12 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import ReviewCard from "./ReviewCard";
 import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
-import { useRouter } from "next/navigation";
 import { loadStripe } from "@stripe/stripe-js";
 import GuestPicker from "./GuestPicker";
-import SharePropertyModal from "../ui/sharePropertymodal";
 import { Label } from "@radix-ui/react-label";
-import { boolean } from "zod";
 import { Input } from "../ui/input";
 import { Switch } from "@radix-ui/react-switch";
-import { error } from "console";
 import { is_available } from "@/actions/bookingActions";
-interface HotelBookingFormProps {
-  onSubmit: (rooms: number) => void;
-}
 
 export default function PropertyListingPage({
   property,
@@ -89,7 +82,6 @@ export default function PropertyListingPage({
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false); // Modal visibility
   const [confirmShare, setConfirmShare] = useState<boolean>(false); // Confirm share action
   const [totalRooms, setTotalRooms] = useState<number>(1);
-  const [isSharedToggle, setIsSharedToggle] = useState<boolean>(false);
 
   console.log(isReserved)
   console.log("isShared: ",isShared)
@@ -98,7 +90,7 @@ export default function PropertyListingPage({
   const { user: kindeUser } = useKindeBrowserClient();
 
   if (!property.id || !host || !kindeUser) {
-    return <>Sorry this property doesn't exist</>;
+    return <>Sorry this property does not exist</>;
   }
   const displayedImages =
     image && image.length > 0
@@ -189,7 +181,7 @@ export default function PropertyListingPage({
     ? property.pricePerNight * totalDays * totalRooms
     : property.pricePerNight * totalDays;
 
-      const bookingValues: TBooking & { isShared: boolean ,Numberofrooms: Number | null } = {
+      const bookingValues: TBooking & { isShared: boolean ,Numberofrooms: number | null } = {
         userId,
         propertyId: property.id,
         checkInOut: {
@@ -574,7 +566,7 @@ export default function PropertyListingPage({
                   availabilityEnd={listing.availabilityEnd}
                   bookings={bookings}
                   type={isShared}
-                  max={Math.min(property.maxGuests, property.Current_space)}
+                  max={Math.min(property.maxGuests, property.Current_space ?? Infinity)}
                   onSave={handleDateSave}
                   onClose={handleClose}
                 />

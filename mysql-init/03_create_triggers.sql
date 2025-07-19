@@ -12,17 +12,17 @@ BEGIN
     END IF;
 END //
 
-CREATE TRIGGER UpdatePropertyMaxGuests
-AFTER INSERT ON Booking
-FOR EACH ROW
-BEGIN
-    -- Update the Current_Space of the property associated with the booking
-    IF NEW.propertyId IS NOT NULL AND NEW.isShared = 1 THEN
-        UPDATE Property
-        SET Current_Space = Current_Space - (NEW.Adult + NEW.Child)
-        WHERE id = NEW.propertyId;
-    END IF;
-END //
+-- CREATE TRIGGER UpdatePropertyMaxGuests
+-- AFTER INSERT ON Booking
+-- FOR EACH ROW
+-- BEGIN
+--     -- Update the Current_Space of the property associated with the booking
+--     IF NEW.propertyId IS NOT NULL AND NEW.isShared = 1 THEN
+--         UPDATE Property
+--         SET Current_Space = Current_Space - (NEW.Adult + NEW.Child)
+--         WHERE id = NEW.propertyId;
+--     END IF;
+-- END //
 
 CREATE TABLE IF NOT EXISTS Deletion_Log (
     id INT AUTO_INCREMENT PRIMARY KEY,

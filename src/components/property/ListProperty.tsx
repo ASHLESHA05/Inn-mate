@@ -214,7 +214,7 @@ export default function ListProperty({
                         </PopoverContent>
                       </Popover>
                       <FormDescription>
-                        Select the start and end dates for your property's
+                        Select the start and end dates for your property&apos;s
                         availability.
                       </FormDescription>
                       <FormMessage />

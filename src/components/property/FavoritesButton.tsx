@@ -33,7 +33,7 @@ export default function FavoriteButton({ propertyId }: FavoriteButtonProps) {
       if (!kindeId) return;
 
       const userRecord = await getUserByKindeId(kindeId);
-      if (!userRecord) {
+      if (!userRecord || !userRecord.id) {
         console.error('User not found in DB');
         return;
       }

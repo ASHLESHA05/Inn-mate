@@ -31,9 +31,6 @@ import BookPropertyButton from "./BookPropertyButton";
 import ListPropertyButton, { EditProperty } from "./ListNowButton";
 import FavoriteButton from './FavoritesButton';
 import ViewPropertyButton from "./ViewPropertyButton";
-import { useState } from "react";
-import { Button } from "../ui/button";
-import { Switch } from "../ui/switch";
 
 interface PropertyCardProps {
   property: TProperty;

@@ -57,6 +57,9 @@ export default async function Home({
     : await getAllListedProperties();
 
   // Prepare property cards
+  if (!properties){
+    return <h1>No prop available</h1>
+  }
   const propertyCards = await Promise.all(
     properties.map(async (property) => {
       if (!property?.id || !property?.locationId) {

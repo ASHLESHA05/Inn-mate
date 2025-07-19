@@ -1,7 +1,5 @@
-import { getAllAmenitiesForProperty } from "@/actions/amenitiesAction";
 import { getLocationById } from "@/actions/locationActions";
 import { getAllImagesbyId, getPropertyById } from "@/actions/propertyActions";
-import { getAllReviewsById } from "@/actions/reviewActions";
 import { getUserById} from "@/actions/userActions";
 import ListProperty from "@/components/property/ListProperty";
 import React from "react";
@@ -25,10 +23,10 @@ const page = async (
     await getUserById(property.userId),
   ]);
   if (!user || !location) {
-    return (<div>Sorry couldn't get all details about the propery</div>);
+    return (<div>Sorry couldn&apos;t get all details about the propery</div>);
   }
   if (!property || !user || !location) {
-    return (<div>Sorry, you're probably looking for something else?</div>);
+    return (<div>Sorry, you&apos;re probably looking for something else?</div>);
   }
   return (
     <ListProperty

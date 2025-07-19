@@ -28,7 +28,7 @@ const Bookings = async (props: { params: Promise<{ kindeId: string }> }) => {
     type: string
   ) => {
     const relevantStatuses = type === "current" ? ["CONFIRMED", "ACTIVE"] : ["COMPLETED"];
-    if(!bookings){
+    if (!bookings) {
       return <>No bookings found</>;
     }
     const filteredBookings = bookings.filter((booking) =>
@@ -65,7 +65,10 @@ const Bookings = async (props: { params: Promise<{ kindeId: string }> }) => {
             hostKindeId={booking.property.userId}
             checkInCheckOutDetail={booking.checkInOut}
             favorites={''}
-            status={booking.status}
+            status={
+              booking.status === " " ? null : booking.status
+            }
+
           />
         );
       })

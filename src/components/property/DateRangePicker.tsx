@@ -139,11 +139,9 @@ export default function DateRangePicker({
             disabled={(day) => isDateDisabled(day)}
             className={cn(
               "base-calendar-class",
-              date && isDateInBookingRange(date.from) ? "booking-range-highlight" : ""
+              date?.from && isDateInBookingRange(date.from) ? "booking-range-highlight" : ""
+
             )}
-            dayClassName={(day) =>
-              isDateInBookingRange(day) ? "bg-orange-200" : ""
-            }
           />
 
           <div className="flex justify-end gap-2 p-4">

@@ -24,13 +24,13 @@ const MyProperties = async () => {
   const user = await getUserByKindeId(kindeUser.id);
   if (!user || !user.id || !isAuthenticated) {
     console.log("couldn't get the user in /user/userId/properties");
-    return (<div>sorry couldn't fetch the user</div>);
+    return (<div>sorry couldn&apos;t fetch the user</div>);
   }
 
   const properties = await getAllPropertiesByUserId(user.id);
   console.log("Properties",properties)
   if (!properties) {
-    return (<div>sorry couldn't fetch the properties</div>);
+    return (<div>sorry couldn&apos;t fetch the properties</div>);
   }
 
   const propertyCards = await Promise.all(

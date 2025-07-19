@@ -4,21 +4,18 @@ import { useEffect, useState } from "react";
 import { loadStripe } from "@stripe/stripe-js";
 import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
 import { getUserByKindeId } from "@/actions/userActions";
-import { TUser } from "@/lib/definitions";
 
 
 export default function PayPage() {
     const [loading, setLoading] = useState(false);
     const [amount, setAmount] = useState<number>(0); // Amount input by the user
     const { user: kindeUser } = useKindeBrowserClient();
-    const [user, setUser] = useState<TUser | null>(null); // State to store the user data
   
     useEffect(() => {
       const fetchUser = async () => {
         if (kindeUser?.id) {
           try {
             const fetchedUser = await getUserByKindeId(kindeUser.id); // Safe to call because we checked for undefined
-            setUser(fetchedUser); // Set the user data to state
             console.log('user:', fetchedUser);
           } catch (error) {
             console.error('Error fetching user:', error);

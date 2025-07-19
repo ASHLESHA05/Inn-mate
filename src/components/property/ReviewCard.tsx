@@ -23,6 +23,9 @@ const ReviewCard =  ({
   propertyId: string;
   user: TUser | null;
 }) => {
+  const [rating, setRating] = useState(0);
+  const [comment, setComment] = useState("");
+  const [existingReviews, setExistingReviews] = useState<Array<TReview & { name: string }> | null>(null);
   console.log("bus"+reviews+"fyufbyu")
   const {toast}= useToast()
 
@@ -32,10 +35,6 @@ const ReviewCard =  ({
   }
 
 
-
-  const [rating, setRating] = useState(0);
-  const [comment, setComment] = useState("");
-  const [existingReviews, setExistingReviews] = useState<Array<TReview & { name: string }> | null>(null);
   useEffect(() => {
     const fetchReviews = async () => {
       const review = await getAllReviewsById(propertyId); // Type inferred as Array<TReview & { name: string }> | null

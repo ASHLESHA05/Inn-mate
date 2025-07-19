@@ -3,6 +3,8 @@ import { FileUploaderRegular } from '@uploadcare/react-uploader/next';
 import '@uploadcare/react-uploader/core.css';
 import { useState } from 'react';
 import './ui_style.css';
+import Image from 'next/image';
+
 
 const UPLOADCARE_BASE_URL = process.env.NEXT_PUBLIC_UPLOADCARE_BASE_URL!;
 
@@ -70,7 +72,7 @@ const Fileinput: React.FC<FileinputProps> = ({ images, setImages, propertyId })=
             onMouseEnter={() => setHoveredImage(image.id)}
             onMouseLeave={() => setHoveredImage(null)}
           >
-            <img src={image.link} alt="Uploaded" />
+            <Image src={image.link} alt="Uploaded" />
 
             <button
               className={`delete-button ${hoveredImage === image.id ? '' : 'disabled'}`}

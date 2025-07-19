@@ -10,7 +10,8 @@ const AdditionalDetails = async () => {
   if (user) {
     return <UserForm user={user as TUser} />;
   } else {
-    <div>sorry couldn't fetch the user</div>;
+    <div>Sorry couldn&apos;t fetch the user</div>
+
   }
 };
 

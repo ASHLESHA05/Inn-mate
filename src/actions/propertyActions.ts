@@ -1,4 +1,3 @@
-
 "use server";
 import {
   imageSchema,
@@ -486,8 +485,11 @@ export async function updatePropertyDelete(
 
 //============================================================================================================================================
 
-export async function isUserHasProperties(kindId: string) {
+export async function isUserHasProperties(kindId: string | undefined) {
   console.log("isUserHasProperties");
+  if(!kindId){
+    return null
+  }
   const userId = await getUserByKindeId(kindId)
   console.log("UserId: ",userId)
 
@@ -551,7 +553,7 @@ export async function AllBookingPropertyDetails(userId: string){
 }
 
 
-export async function getDeleteProplogs(userId: string) {
+export async function getDeleteProplogs(userId: string | undefined) {
   const res: any[] = await prisma.$queryRaw`
     SELECT *
     FROM Deletion_log as dl

@@ -1,7 +1,30 @@
 services:
+  app:
+    build: .
+    container_name: nextjs-app
+    ports:
+      - "3000:3000"
+    environment:
+      MYSQL_HOST: db
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    depends_on:
+      db:
+        condition: service_healthy
+    entrypoint: >
+      sh -c "
+        echo 'Waiting for DB...';
+        until nc -z db 3306; do sleep 1; done;
+        echo 'DB is ready';
+        npx prisma migrate deploy;
+        npm start
+      "
+
   db:
     image: mysql:8
-    restart: unless-stopped
+    container_name: mysql-db
+    command: --log-bin-trust-function-creators=1
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: ${MYSQL_DATABASE}
@@ -10,8 +33,13 @@ services:
     ports:
       - "3306:3306"
     volumes:
-      - InnMate_db_data:/var/lib/mysql
+      - db_data:/var/lib/mysql
       - ./mysql-init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 volumes:
-  InnMate_db_data:
+  db_data:

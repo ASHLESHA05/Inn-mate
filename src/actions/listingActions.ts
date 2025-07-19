@@ -4,7 +4,6 @@ import { isAuthenticatedUserInDb } from "./userActions";
 import prisma from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import  cuid  from "cuid";  // Import cuid for generating unique IDs
-import { Listing } from "@prisma/client";
 
 export async function createListing(
   listingValues: TListing

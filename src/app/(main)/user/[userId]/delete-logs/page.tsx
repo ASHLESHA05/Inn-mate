@@ -17,8 +17,8 @@ export default async function AllBookingsdelLogs(props: Props) {
   }
 
   // Fetch delete logs sorted in ascending and descending order
-  const deleteLogsAsc = await getDeleteProplogs(user?.id, "asc");
-  const deleteLogsDesc = await getDeleteProplogs(user?.id, "desc");
+  const deleteLogsAsc = await getDeleteProplogs(user?.id);
+  const deleteLogsDesc = await getDeleteProplogs(user?.id);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">

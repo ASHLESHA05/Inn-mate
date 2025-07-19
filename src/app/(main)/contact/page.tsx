@@ -8,7 +8,7 @@ function Contact() {
         <h1 className="text-4xl font-bold text-center text-gray-800 mb-6">Contact Us</h1>
 
         <p className="text-center text-gray-600 mb-10">
-          We'd love to hear from you! Whether you have a question, feedback, or need assistance, reach out to us.
+          We&apos;d love to hear from you! Whether you have a question, feedback, or need assistance, reach out to us.
         </p>
 
         {/* Contact Form */}

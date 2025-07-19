@@ -41,7 +41,7 @@ const page = async (props: { params: Promise<{ propertyId: string }> }) => {
     ]);
   console.log("3",host ,"2",location,"1", listing)
   if (!host || !location || !listing) {
-    return (<div>Sorry couldn't get all details about the property</div>);
+    return (<div>Sorry couldn&apos;t get all details about the property</div>);
   }
   return (
     <PropertyListingPage
